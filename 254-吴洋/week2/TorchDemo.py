@@ -3,8 +3,6 @@
 import torch
 import torch.nn as nn
 import numpy as np
-import random
-import json
 import matplotlib.pyplot as plt
 
 """
@@ -21,7 +19,7 @@ class TorchModel(nn.Module):
         super(TorchModel, self).__init__()
         self.linear = nn.Linear(input_size, 1)  # 线性层
         self.activation = torch.sigmoid  # sigmoid归一化函数
-        self.loss = nn.functional.mse_loss  # loss函数采用均方差损失
+        self.loss = nn.functional.binary_cross_entropy  # loss函数采用均方差损失
 
     # 当输入真实标签，返回loss值；无真实标签，返回预测值
     def forward(self, x, y=None):
