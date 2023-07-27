@@ -74,9 +74,13 @@ def evaluate(model):
     with torch.no_grad():
         y_pred = model(x)  # 模型预测
         for y_p, y_t in zip(y_pred, y):  # 与真实标签进行对比
-            if float(y_p) < 0.5 and int(y_t) == 0:
+            if float(y_p) < 0.5 and int(y_t) == 1:
                 correct += 1  # 负样本判断正确
-            elif float(y_p) >= 0.5 and int(y_t) == 1:
+            elif float(y_p) >= 0.5 and int(y_t) == 2:
+                correct += 1  # 正样本判断正确
+            elif float(y_p) < 0.5 and int(y_t) == 3:
+                correct += 1  # 正样本判断正确
+            elif float(y_p) >= 0.5 and int(y_t) == 4:
                 correct += 1  # 正样本判断正确
             else:
                 wrong += 1
@@ -146,4 +150,3 @@ if __name__ == "__main__":
                 [0.78797868,0.67482528,0.13625847,0.34675372,0.09871392],
                 [0.89349776,0.59416669,0.92579291,0.41567412,0.7358894]]
     predict("model.pth", test_vec)
-
