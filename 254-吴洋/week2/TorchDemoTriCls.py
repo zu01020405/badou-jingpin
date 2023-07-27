@@ -17,14 +17,16 @@ import matplotlib.pyplot as plt
 class TorchModel(nn.Module):
     def __init__(self, input_size):
         super(TorchModel, self).__init__()
-        self.linear = nn.Linear(input_size, 3)  # 线性层
+        self.linear_1 = nn.Linear(input_size, 4)  # 线性层
+        self.linear_2 = nn.Linear(4, 3)  # 线性层
         self.activation = torch.softmax  # sigmoid归一化函数
         self.loss = nn.functional.cross_entropy  # loss函数采用均方差损失
 
     # 当输入真实标签，返回loss值；无真实标签，返回预测值
     def forward(self, x, y=None):
-        x = self.linear(x)  # (batch_size, input_size) -> (batch_size, 3)
-        y_pred = self.activation(x, 1)  # (batch_size, 3) -> (batch_size, 3)
+        x_1 = self.linear_1(x)  # (batch_size, input_size) -> (batch_size, 3)
+        x_2 = self.linear_2(x_1)
+        y_pred = self.activation(x_2, 1)  # (batch_size, 3) -> (batch_size, 3)
         if y is not None:
             return self.loss(y_pred, y)  # 预测值和真实值计算损失
         else:
