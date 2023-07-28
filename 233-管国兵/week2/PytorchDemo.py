@@ -24,17 +24,18 @@ class TorchModel(nn.Module):
     def __init__(self, input_size, hidden_size1, hidden_size2):
         super(TorchModel, self).__init__()
         self.layer1 = nn.Linear(input_size, hidden_size1) # 6 , 9
+        self.activation = nn.GELU()
         self.layer2 = nn.Linear(hidden_size1, hidden_size2) # 9 , 3
-        self.act = torch.softmax # sigmod归一化
         self.loss = nn.CrossEntropyLoss # 交叉熵
 
     def forward(self, x, y=None):
         hidden = self.layer1(x) # 20*6 -> 20*9
-        y_pred = self.act(hidden) # 激活层不改变形状
+        y_pred = self.activation(hidden)
         y_pred = self.layer2(y_pred) # 20 * 3
-        y_pred = self.act(y_pred)
+        y_pred = self.activation(y_pred)
         if y is not None:
-            loss = self.loss(y_pred, y)
+            loss_fn = nn.CrossEntropyLoss()  # 创建交叉熵损失函数实例
+            loss = loss_fn(y_pred, torch.argmax(y, dim=1))  # 使用交叉熵损失函数计算损失
             return loss
         else:
             return y_pred
@@ -44,13 +45,19 @@ class TorchModel(nn.Module):
 def build_sample():
     x = np.random.random(6)
     if x[0] > x[1]:
-        return x, [1, 0, 0] # 第一类
+        return x, 0 # 第一类
     elif x[2] > x[3]:
-        return x, [0, 1, 0] # 第二类
+        return x, 1# 第二类
     elif x[4] > x[5]:
-        return x, [0, 0, 1]# 第三类
+        return x, 2# 第三类
     else:
         return build_sample();
+
+def to_one_hot(target, shape=3):
+    one_hot_target = np.zeros(shape)
+
+    one_hot_target[target] = 1
+    return one_hot_target
 
 # 随机生成一批样本
 def build_dataset(total_sample_num):
@@ -59,45 +66,11 @@ def build_dataset(total_sample_num):
     while len(X) < total_sample_num:
         x, y = build_sample()
         X.append(x)
-        Y.append(y)
-    return torch.FloatTensor(np.array(X)), torch.FloatTensor(np.array(Y))
-
-X, Y = build_dataset(10)
-# X = tensor([[0.6349, 0.3288, 0.9351, 0.3435, 0.5702, 0.4199],
-#         [0.9741, 0.9030, 0.7117, 0.7334, 0.9790, 0.5259],
-#         [0.0830, 0.0889, 0.0802, 0.7943, 0.9375, 0.3662],
-#         [0.0185, 0.2207, 0.7742, 0.7664, 0.9057, 0.1738],
-#         [0.3694, 0.8043, 0.1318, 0.4677, 0.3696, 0.0175],
-#         [0.4653, 0.7395, 0.4892, 0.1021, 0.6315, 0.9655],
-#         [0.8266, 0.9315, 0.9767, 0.8642, 0.0232, 0.0034],
-#         [0.6208, 0.5251, 0.8273, 0.3856, 0.7574, 0.8058],
-#         [0.7226, 0.3082, 0.8806, 0.9964, 0.6943, 0.2087],
-#         [0.2635, 0.7596, 0.7196, 0.5752, 0.9399, 0.8313]])
-# Y = tensor([[1., 0., 0.],
-#         [1., 0., 0.],
-#         [0., 0., 1.],
-#         [0., 1., 0.],
-#         [0., 0., 1.],
-#         [0., 1., 0.],
-#         [0., 1., 0.],
-#         [1., 0., 0.],
-#         [1., 0., 0.],
-#         [0., 1., 0.]])
-
-# 损失函数用 交叉熵，计算 y_pre 与 target 之间的损失
-# CrossEntropyLoss(y_pre, target) ~= 0.3 损失，默认会为输入参数y_pre做 softMax
-
-# 定义预测函数
-def predict(model):
-    model.eval()  # 设置模型为评估模式
-    with torch.no_grad():  # 在预测时不计算梯度，节省内存和计算资源
-        x = torch.tensor(x, dtype=torch.float32)
-        output = model(x.unsqueeze(0))
-        _, predicted_class = torch.max(output, 1)  # 获取最大值对应的类别索引
-        return predicted_class.item()
+        Y.append(to_one_hot(y))
+    return torch.FloatTensor(X), torch.FloatTensor(Y)
 
 def main():
-    epoch_num = 10 # 训练轮数
+    epoch_num = 100 # 训练轮数
     batch_size = 20 # 每次训练样本个数
     train_sample = 5000 # 每轮训练总样本个数
     input_size = 6 # 输入向量的维度
@@ -124,35 +97,22 @@ def main():
             optim.zero_grad() # 梯度归零
             watch_loss.append(loss.item()) # loss汇总
         print("=========\n第%d轮平均loss:%f" % (epoch + 1, np.mean(watch_loss)))
-        # acc = evaluate(model)  # 测试本轮模型结果
-        # log.append([acc, float(np.mean(watch_loss))])
 
     # 保存模型
     torch.save(model.state_dict(), "model.pth")
-    # 画图
-    # print(log)
-    # plt.plot(range(len(log)), [l[0] for l in log], label="acc")  # 画acc曲线
-    # plt.plot(range(len(log)), [l[1] for l in log], label="loss")  # 画loss曲线
-    # plt.legend()
-    # plt.show()
     return
 
 if __name__ == "__main__":
-    main()
+    # main()
 
-    # test_vec = [[0.47889086,0.15229675,0.31082123,0.03504317,0.18920843, 0.03504317],
-    #             [0.44963533,0.5524256,0.95758807,0.94520434,0.84890681,0.03504317],
-    #             [0.58797868,0.67482528,0.13625847,0.34675372,0.29871392, 0.03504317],
-    #             [0.89349776,0.59416669,0.92579291,0.41567412,0.7358894, 0.03504317]]
-    #
-    # model = TorchModel()
-    # # 加载模型权重
-    # model.load_state_dict(torch.load("model.pth"))
-    # model.eval()  # 设置模型为评估模式
-    #
-    #
-
-    # # 例子：使用预测函数进行预测
-    # sample_to_predict = [0.2, 0.3, 0.1, 0.4, 0.8, 0.6]
-    # predicted_class = predict(sample_to_predict)
-    # print(f"Predicted Class: {predicted_class}")
+    input_size = 6
+    model = TorchModel(input_size, 9, 3)
+    model.load_state_dict(torch.load("model.pth"))  # 加载训练好的权重
+    model.eval()  # 测试模式
+    test_vec = [[0.47889086,0.15229675,0.31082123,0.03504317,0.18920843,0.18920843],
+                [0.94963533,0.5524256,0.95758807,0.95520434,0.84890681,0.18920843],
+                [0.78797868,0.67482528,0.13625847,0.34675372,0.09871392,0.18920843],
+                [0.49349776,0.59416669,0.32579291,0.41567412,0.7358894,0.18920843]]
+    with torch.no_grad():  # 不计算梯度
+        result = model.forward(torch.FloatTensor(test_vec))  # 模型预测
+        print(result)
