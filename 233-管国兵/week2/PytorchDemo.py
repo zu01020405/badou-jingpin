@@ -87,19 +87,14 @@ X, Y = build_dataset(10)
 # 损失函数用 交叉熵，计算 y_pre 与 target 之间的损失
 # CrossEntropyLoss(y_pre, target) ~= 0.3 损失，默认会为输入参数y_pre做 softMax
 
-# def evaluate(model):
-#     model.eval()
-#     test_sample_num = 100
-#     x, y = build_dataset(test_sample_num)
-#
-#     correct, wrong = 0, 0
-#
-#     with torch.no_grad():
-#         y_pred = model(x)  # 模型预测
-#
-#
-#     print("正确预测个数：%d, 正确率：%f" % (correct, correct / (correct + wrong)))
-#     return correct / (correct + wrong)
+# 定义预测函数
+def predict(model):
+    model.eval()  # 设置模型为评估模式
+    with torch.no_grad():  # 在预测时不计算梯度，节省内存和计算资源
+        x = torch.tensor(x, dtype=torch.float32)
+        output = model(x.unsqueeze(0))
+        _, predicted_class = torch.max(output, 1)  # 获取最大值对应的类别索引
+        return predicted_class.item()
 
 def main():
     epoch_num = 10 # 训练轮数
@@ -156,16 +151,7 @@ if __name__ == "__main__":
     # model.eval()  # 设置模型为评估模式
     #
     #
-    # # 定义预测函数
-    # def predict(x):
-    #     model.eval()  # 设置模型为评估模式
-    #     with torch.no_grad():  # 在预测时不计算梯度，节省内存和计算资源
-    #         x = torch.tensor(x, dtype=torch.float32)
-    #         output = model(x.unsqueeze(0))
-    #         _, predicted_class = torch.max(output, 1)  # 获取最大值对应的类别索引
-    #         return predicted_class.item()
-    #
-    #
+
     # # 例子：使用预测函数进行预测
     # sample_to_predict = [0.2, 0.3, 0.1, 0.4, 0.8, 0.6]
     # predicted_class = predict(sample_to_predict)
