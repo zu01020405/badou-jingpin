@@ -3,7 +3,16 @@ import torch
 import torch.nn as nn
 from torch.utils.data import DataLoader, TensorDataset
 
-
+"""
+基于pytorch框架编写模型训练
+实现一个自行构造的找规律(机器学习)任务
+规律：
+# 0：第一个大于第六个数
+# 1：第二个大于第五个数
+# 2：第三个大于第四个数
+# 3：其他
+# 优先级从上往下，如第一个数大于第六个，第二个大于第五个，则判断为第0类
+"""
 # 定义TorchModel类，这是一个简单的神经网络模型。
 class TorchModel(nn.Module):
     def __init__(self, input_size, hidden_size):
@@ -29,8 +38,13 @@ class TorchModel(nn.Module):
 
 
 # 函数用于生成一个带有对应标签的单个样本。
+# 随机生成一个6维向量，对应不同的类别,
+# 优先级从上往下，如第一个数大于第六个，第二个大于第五个，则判断为第0类
+# 0：第一个大于第六个数
+# 1：第二个大于第五个数
+# 2：第三个大于第四个数
+# 3：其他
 def build_sample():
-    # 生成一个6维随机输入向量
     x = np.random.random(6)
     # 通过比较输入的不同元素来确定标签
     if x[0] > x[5]:
