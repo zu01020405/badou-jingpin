@@ -13,8 +13,8 @@ import torch.optim as optim
 基于pytorch框架编写模型训练
 实现一个自行构造的找分类(机器学习)任务
 分类：x是一个6维向量，
-    如果第1个数>第2个数，则为第1类
-    如果第3个数>第4个数，则为第2类
+    如果第1个数>第2个数，则为第0类
+    如果第3个数>第4个数，则为第1类
     如果第4个数>第5个数，则为第2类
 
 """
@@ -24,7 +24,7 @@ class TorchModel(nn.Module):
     def __init__(self, input_size, hidden_size1, hidden_size2):
         super(TorchModel, self).__init__()
         self.layer1 = nn.Linear(input_size, hidden_size1) # 6 , 9
-        self.activation = nn.GELU()
+        self.activation = nn.ReLU()
         self.layer2 = nn.Linear(hidden_size1, hidden_size2) # 9 , 3
         self.loss = nn.CrossEntropyLoss # 交叉熵
 
@@ -41,7 +41,7 @@ class TorchModel(nn.Module):
             return y_pred
 
 # 分类规则，创建训练样本
-# x是长度6的向量，y是one-hot类型
+# x是长度6的向量，y是类别
 def build_sample():
     x = np.random.random(6)
     if x[0] > x[1]:
@@ -81,7 +81,6 @@ def main():
     model = TorchModel(input_size, hidden_size1, hidden_size2)
     # 选择优化器
     optim = torch.optim.Adam(model.parameters(), lr=learning_rate)
-    log = []
     # 创建训练集，正常任务是读取训练集
     train_x, train_y = build_dataset(train_sample) # 5000 对训练样本
 
@@ -110,9 +109,17 @@ if __name__ == "__main__":
     model.load_state_dict(torch.load("model.pth"))  # 加载训练好的权重
     model.eval()  # 测试模式
     test_vec = [[0.47889086,0.15229675,0.31082123,0.03504317,0.18920843,0.18920843],
-                [0.94963533,0.5524256,0.95758807,0.95520434,0.84890681,0.18920843],
-                [0.78797868,0.67482528,0.13625847,0.34675372,0.09871392,0.18920843],
-                [0.49349776,0.59416669,0.32579291,0.41567412,0.7358894,0.18920843]]
+                [0.44963533,0.5524256,0.95758807,0.90520434,0.04890681,0.48920843],
+                [0.58797868,0.67482528,0.13625847,0.34675372,0.99871392,0.18920843],
+                [0.99349776,0.59416669,0.32579291,0.41567412,0.5358894,0.98920843]]
     with torch.no_grad():  # 不计算梯度
         result = model.forward(torch.FloatTensor(test_vec))  # 模型预测
-        print(result)
+        '''
+            如果第1个数>第2个数，则为第0类
+            如果第3个数>第4个数，则为第1类
+            如果第4个数>第5个数，则为第2类
+        '''
+    for vec, res in zip(test_vec, result): # 结果
+        print('测试样本：', vec)
+        print("预测类别：", torch.argmax(res).item())
+        print('\n')
