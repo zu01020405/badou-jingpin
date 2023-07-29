@@ -19,7 +19,7 @@ import matplotlib.pyplot as plt
 class TorchModel(nn.Module):
     def __init__(self, input_size):
         super(TorchModel, self).__init__()
-        self.linear = nn.Linear(input_size, 4)  # 线性层
+        self.linear = nn.Linear(input_size, 3)  # 线性层
         self.activation = nn.Softmax(dim=1) # softmax归一化函数
         self.loss = nn.CrossEntropyloss # loss函数采用均方差损失
 
