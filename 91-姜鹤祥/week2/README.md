@@ -21,4 +21,7 @@
           y_pred = torch.argmax(y_pred, dim=1)  # 找到概率最大的类别索引  
   
 ## 训练过程中损失值和结果    
-！[image](https://github.com/JhxCUGBCS/badou-jingpin/blob/main/91-%E5%A7%9C%E9%B9%A4%E7%A5%A5/week2/%E4%B8%89%E5%88%86%E7%B1%BB%E6%8D%9F%E5%A4%B1%E5%80%BC%E5%92%8C%E7%BB%93%E6%9E%9C.png)
+![image](https://github.com/JhxCUGBCS/badou-jingpin/blob/main/91-%E5%A7%9C%E9%B9%A4%E7%A5%A5/week2/%E4%B8%89%E5%88%86%E7%B1%BB%E6%8D%9F%E5%A4%B1%E5%80%BC%E5%92%8C%E7%BB%93%E6%9E%9C.png)
+  
+## 预测结果演示  
+![image](https://github.com/JhxCUGBCS/badou-jingpin/blob/main/91-%E5%A7%9C%E9%B9%A4%E7%A5%A5/week2/%E8%BF%90%E8%A1%8C%E7%BB%93%E6%9E%9C.jpg)
