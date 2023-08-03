@@ -80,7 +80,7 @@ def build_dataset(sample_length, vocab, sentence_length, balanced: bool = False)
     label_volume_threshold = sample_length // 4
     while i <= sample_length:
         x, y = build_sample(TARGET_CHARS, vocab, sentence_length)
-        if counter[str(y)] > label_volume_threshold:
+        if balanced and counter[str(y)] > label_volume_threshold:
             continue
         dataset_x.append(x)
         dataset_y.append([y])
